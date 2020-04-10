@@ -1,6 +1,15 @@
 import React from "react";
-import classes from "./Timeline.module.css";
+import styled from "styled-components";
+
+const TimelineWrapper = styled.svg`
+  background: lightgray;
+`;
 
 export default function Timeline() {
-  return <svg className={classes.timeline} width={1450} height={40}></svg>;
+  return (
+    <TimelineWrapper
+      width={1450}
+      height={40}
+    ></TimelineWrapper>
+  );
 }

@@ -6,6 +6,7 @@ module.exports = {
     alias: {
       react: path.resolve("./node_modules/react"),
       d3: path.resolve("./node_modules/d3"),
+      "styled-components": path.resolve("./node_modules/styled-components")
     },
   },
   module: {
@@ -27,22 +28,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: {
-              importLoaders: 1,
-              modules: true,
-            },
-          },
-        ],
-        include: /\.module\.css$/,
-      },
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"],
-        exclude: /\.module\.css$/,
+        use: ["style-loader", "css-loader"]
       },
     ],
   },
