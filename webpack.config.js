@@ -1,6 +1,13 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 module.exports = {
+  resolve: {
+    alias: {
+      react: path.resolve("./node_modules/react"),
+      d3: path.resolve("./node_modules/d3"),
+    },
+  },
   module: {
     rules: [
       {
