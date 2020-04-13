@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import { AxisLeft } from "d3-components";
 import { scaleLinear, line } from "d3";
 import styled from "styled-components";
-import temperatures from "../assets/temperatures.json";
+import temperatures from "../../assets/temperatures.json";
+import BufferWidthContext from "../../contexts/bufferContext";
 
 const Container = styled.div`
   display: flex;
@@ -48,7 +49,13 @@ const Series = () => {
   );
 };
 
-export default function VitalsDiagram(props) {
+const VitalsDiagram = (props) => {
+  const { setSeriesNumber } = useContext(BufferWidthContext);
+
+  useEffect(() => {
+    setSeriesNumber(1);
+  }, []);
+
   return (
     <Container {...props}>
       <AxisContainer>
@@ -63,3 +70,5 @@ export default function VitalsDiagram(props) {
     </Container>
   );
 }
+
+export default VitalsDiagram;
