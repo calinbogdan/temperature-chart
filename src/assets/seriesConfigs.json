@@ -1,0 +1,8 @@
+[
+  {
+    "id": "temperature",
+    "max": 42,
+    "min": 35,
+    "height": 300
+  }
+]
