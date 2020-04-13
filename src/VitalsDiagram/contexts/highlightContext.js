@@ -1,3 +1,5 @@
+import React, { useState, createContext } from "react";
+
 const HighlightContext = createContext(null);
 
 const HighlightProvider = ({ children }) => {
@@ -8,10 +10,10 @@ const HighlightProvider = ({ children }) => {
       value={{
         highlightedId,
         highlight: (id) => {
-          if (highlightedId === null) {
-            setHighlightedId(id);
-          } else {
+          if (highlightedId === id) {
             setHighlightedId(null);
+          } else {
+            setHighlightedId(id);
           }
         },
       }}
@@ -20,3 +22,6 @@ const HighlightProvider = ({ children }) => {
     </HighlightContext.Provider>
   );
 };
+
+export { HighlightProvider };
+export default HighlightContext;
