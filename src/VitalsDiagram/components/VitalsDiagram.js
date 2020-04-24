@@ -1,113 +1,19 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  createContext,
-  useCallback,
-  memo,
-  useMemo,
-  useRef,
-} from "react";
-import * as d3 from "d3";
-import { scaleLinear, line, zoom, select } from "d3";
+import React, { useEffect, useContext, useCallback, useRef } from "react";
 import styled from "styled-components";
 
 import BufferWidthContext from "../../contexts/bufferContext";
-import AxisContainer from "./AxisContainer";
 import HighlightContext, {
   HighlightProvider,
 } from "../contexts/highlightContext";
 import TimelineContext from "../../contexts/timelineContext";
 
+import AxisContainer from "./AxisContainer";
+import Series from "./Series";
+
 const Container = styled.div`
   display: flex;
   flex-direction: row;
 `;
-
-const Line = styled.path`
-  fill: none;
-  stroke: ${(props) => props.color};
-  stroke-width: ${(props) => (props.highlighted ? 2 : 0.5)};
-`;
-
-const PointValue = styled.text`
-  transform: translate(-5px, -5px);
-  font-family: monospace;
-  font-size: 12px;
-`;
-
-const Circle = memo(({ cx, cy, fill, value }) => {
-  return (
-    <g>
-      <circle r={3} cx={cx} cy={cy} fill={fill} />
-      <PointValue x={cx} y={cy}>
-        {value.toFixed(1)}
-      </PointValue>
-    </g>
-  );
-});
-
-const Series = ({ id, data }) => {
-  const { highlightedId } = useContext(HighlightContext);
-  const { timeScale } = useContext(TimelineContext);
-  const [scale, setScale] = useState(() =>
-    scaleLinear([data.max, data.min], [0, data.height])
-  );
-
-  useEffect(() => {
-    setScale(() => scaleLinear([data.max, data.min], [0, data.height]));
-  }, [data]);
-
-  const pointsY = useMemo(
-    () => data.values.map((entry) => scale(entry.value)),
-    [data.values, scale]
-  );
-  const pointsX = useMemo(
-    () => data.values.map((entry) => timeScale(entry.time)),
-    [data.values, timeScale]
-  );
-
-  console.log(timeScale.domain());
-  const renderables = data.values.filter((_, index) => {
-    // only those that are within the rendered domain
-
-    const pointTime = timeScale.invert(pointsX[index]);
-    return (
-      timeScale.domain()[0].getTime() <= pointTime.getTime() &&
-      timeScale.domain()[1].getTime() >= pointTime.getTime()
-    );
-  });
-
-  console.log(renderables);
-
-  const lineAs = line()
-    .y((_, i) => pointsY[i])
-    .x((_, i) => pointsX[i]);
-
-  return (
-    <g id={id}>
-      <Line
-        highlighted={highlightedId === data.id}
-        color={data.color}
-        d={lineAs(data.values)}
-      />
-      {highlightedId === data.id && (
-        <g>
-          {renderables.map((entry, index) => (
-            <g key={index}>
-              <Circle
-                fill={data.color}
-                cx={timeScale(entry.time)}
-                cy={scale(entry.value)}
-                value={entry.value}
-              />
-            </g>
-          ))}
-        </g>
-      )}
-    </g>
-  );
-};
 
 const withHighlightedLast = (series, highlightedId) => [
   ...series.filter(({ id }) => highlightedId !== id),
@@ -115,35 +21,36 @@ const withHighlightedLast = (series, highlightedId) => [
 ];
 
 const VitalsDiagram = ({ series }) => {
-  const { width, diagramWidth, setSeriesNumber } = useContext(
-    BufferWidthContext
-  );
+  const { diagramWidth, setSeriesNumber } = useContext(BufferWidthContext);
   const { drag, zoom } = useContext(TimelineContext);
+  const rectRef = useRef();
 
   useEffect(() => {
     setSeriesNumber(series.length);
   }, [series]);
 
-  const onWheelListener = useCallback(e => {
+  const onWheelListener = useCallback((e) => {
     if (e.ctrlKey) {
       e.preventDefault();
       zoom(e.offsetX, e.deltaY < 0);
     }
   });
 
-  const onMouseMoveListener = useCallback(e => {
+  const onMouseMoveListener = useCallback((e) => {
     if (e.buttons > 0) {
       drag(e.movementX);
     }
   });
 
   useEffect(() => {
-    window.addEventListener("mousewheel", onWheelListener, { passive: false });
-    window.addEventListener("mousemove", onMouseMoveListener);
+    rectRef.current.addEventListener("mousewheel", onWheelListener, {
+      passive: false,
+    });
+    rectRef.current.addEventListener("mousemove", onMouseMoveListener);
 
     return () => {
-      window.removeEventListener("mousewheel", onWheelListener);
-      window.removeEventListener("mousemove", onMouseMoveListener);
+      rectRef.current.removeEventListener("mousewheel", onWheelListener);
+      rectRef.current.removeEventListener("mousemove", onMouseMoveListener);
     };
   }, []);
 
@@ -161,6 +68,12 @@ const VitalsDiagram = ({ series }) => {
                       <Series key={data.id} id={data.id} data={data} />
                     ))}
                   </g>
+                  <rect
+                    ref={rectRef}
+                    height={300}
+                    width={diagramWidth}
+                    fill="transparent"
+                  />
                 </svg>
               </React.Fragment>
             );
