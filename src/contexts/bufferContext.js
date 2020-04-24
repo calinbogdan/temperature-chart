@@ -2,17 +2,21 @@ import React, { createContext, useState } from "react";
 
 const BufferWidthContext = createContext(null);
 
-const BufferWidthProvider = ({ children }) => {
-  const [width, setWidth] = useState(0);
+const STANDARD_AXIS_WIDTH = 35;
+
+const BufferWidthProvider = (props) => {
+  const [bufferWidth, setBufferWidth] = useState(0);
 
   return (
     <BufferWidthContext.Provider
       value={{
-        width,
-        setSeriesNumber: seriesCount => setWidth(seriesCount * 35)
+        width: props.width,
+        diagramWidth: props.width - bufferWidth,
+        bufferWidth,
+        setSeriesNumber: seriesCount => setBufferWidth(seriesCount * STANDARD_AXIS_WIDTH)
       }}
     >
-      {children}
+      {props.children}
     </BufferWidthContext.Provider>
   );
 };
