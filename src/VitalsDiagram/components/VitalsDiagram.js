@@ -67,6 +67,7 @@ const Series = ({ id, data }) => {
     [data.values, timeScale]
   );
 
+  console.log(timeScale.domain());
   const renderables = data.values.filter((_, index) => {
     // only those that are within the rendered domain
 
@@ -76,6 +77,8 @@ const Series = ({ id, data }) => {
       timeScale.domain()[1].getTime() >= pointTime.getTime()
     );
   });
+
+  console.log(renderables);
 
   const lineAs = line()
     .y((_, i) => pointsY[i])
@@ -94,8 +97,8 @@ const Series = ({ id, data }) => {
             <g key={index}>
               <Circle
                 fill={data.color}
-                cx={pointsX[index]}
-                cy={pointsY[index]}
+                cx={timeScale(entry.time)}
+                cy={scale(entry.value)}
                 value={entry.value}
               />
             </g>
