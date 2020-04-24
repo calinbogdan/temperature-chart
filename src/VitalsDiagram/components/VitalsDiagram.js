@@ -115,7 +115,7 @@ const VitalsDiagram = ({ series }) => {
   const { width, diagramWidth, setSeriesNumber } = useContext(
     BufferWidthContext
   );
-  const { zoom } = useContext(TimelineContext);
+  const { drag, zoom } = useContext(TimelineContext);
 
   useEffect(() => {
     setSeriesNumber(series.length);
@@ -128,13 +128,19 @@ const VitalsDiagram = ({ series }) => {
     }
   });
 
+  const onMouseMoveListener = useCallback(e => {
+    if (e.buttons > 0) {
+      drag(e.movementX);
+    }
+  });
+
   useEffect(() => {
     window.addEventListener("mousewheel", onWheelListener, { passive: false });
-    // window.addEventListener("mousemove", mouseMoveListener);
+    window.addEventListener("mousemove", onMouseMoveListener);
 
     return () => {
       window.removeEventListener("mousewheel", onWheelListener);
-      // window.removeEventListener("mousemove", mouseMoveListener);
+      window.removeEventListener("mousemove", onMouseMoveListener);
     };
   }, []);
 

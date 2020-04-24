@@ -23,14 +23,14 @@ const reducer = (state, action) => {
       return {
         ...state,
         domain: action.domain,
-        scale: state.scale.domain(action.domain)
+        scale: state.scale.domain(action.domain),
       };
     case FULL_DOMAIN_CHANGE:
       return {
         ...state,
         fullDomain: action.fullDomain,
         domain: action.fullDomain,
-        scale: scaleTime(action.fullDomain, state.scale.range())
+        scale: scaleTime(action.fullDomain, state.scale.range()),
       };
 
     case SCALE_CHANGE:
@@ -39,6 +39,21 @@ const reducer = (state, action) => {
         scale: scaleTime(action.domain, state.scale.range()),
       };
 
+    case DRAG: {
+      const { movementX } = action;
+
+      const x1 = state.scale(state.domain[0]);
+      const x2 = state.scale(state.domain[1]);
+
+      const newStart = state.scale.invert(x1 - movementX);
+      const newEnd = state.scale.invert(x2 - movementX);
+
+      return {
+        ...state,
+        domain: [newStart, newEnd],
+        scale: scaleTime([newStart, newEnd], state.scale.range())
+      }
+    }
     case ZOOM:
       const { x, zoomingIn } = action;
       const currentTime = state.scale.invert(x);
@@ -68,7 +83,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         domain: [newStart, newEnd],
-        scale: scaleTime([newStart, newEnd], state.scale.range())
+        scale: scaleTime([newStart, newEnd], state.scale.range()),
       };
   }
 };
@@ -107,26 +122,18 @@ const TimelineProvider = ({ children }) => {
           });
         },
         drag: (movementX) => {
-          const x1 = state.scale(state.domain[0]);
-          const x2 = state.scale(state.domain[1]);
-
-          const newStart = state.scale.invert(x1 - movementX);
-          const newEnd = state.scale.invert(x2 - movementX);
-
-          if (domainFitsWithinFull([newStart, newEnd], state.fullDomain)) {
-            dispatch({
-              type: DOMAIN_CHANGE,
-              domain: [newStart, newEnd],
-            });
-          }
+          dispatch({
+            type: DRAG,
+            movementX,
+          });
         },
         zoom: (x, zoomingIn) => {
           dispatch({
             type: ZOOM,
             x,
-            zoomingIn
+            zoomingIn,
           });
-        }
+        },
       }}
     >
       {children}
