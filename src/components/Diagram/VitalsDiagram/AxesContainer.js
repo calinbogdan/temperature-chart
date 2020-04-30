@@ -36,10 +36,10 @@ const Container = styled.div`
   flex-direction: row;
 `;
 
-const AxesContainer = () => {
+const AxesContainer = ({ height, series }) => {
   return (
     <Container>
-      <Axis height={300} high={40} low={35} />
+      {series.map((serie, index) => <Axis key={index} height={height} high={serie.high} low={serie.low} />)}
     </Container>
   );
 };
