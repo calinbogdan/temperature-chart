@@ -35,7 +35,7 @@ const Axis = ({ data: { id, max, min, height, color } }) => {
 
   return (
     <svg overflow="visible" height={height} width={35}>
-      <AxisLeft nested scale={scale} />
+      <AxisLeft nested scale={scale} width={35} />
       <ClickableRectangle
         height={height}
         width={35}

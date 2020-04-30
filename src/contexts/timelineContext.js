@@ -17,13 +17,24 @@ const DOMAIN_CHANGE = "DOMAIN_CHANGE";
 const DRAG = "DRAG";
 const SCALE_CHANGE = "SCALE_CHANGE";
 
+
+function changeDomainAndScaleWithFullDomainLimit(scale, domain, fullDomain) {
+  const fullInterval = fullDomain[1].getTime() - fullDomain[0].getTime();
+  const interval = domain[1].getTime() - domain[0].getTime();
+
+  const newDomain = fullInterval >= interval ? domain : fullDomain;
+  return {
+    scale: scaleTime(newDomain, scale.range()),
+    domain: newDomain
+  };
+}
+
 const reducer = (state, action) => {
   switch (action.type) {
     case DOMAIN_CHANGE:
       return {
         ...state,
-        domain: action.domain,
-        scale: state.scale.domain(action.domain),
+        ...changeDomainAndScaleWithFullDomainLimit(state.scale, action.domain, state.fullDomain)
       };
     case FULL_DOMAIN_CHANGE:
       return {
@@ -50,8 +61,7 @@ const reducer = (state, action) => {
 
       return {
         ...state,
-        domain: [newStart, newEnd],
-        scale: scaleTime([newStart, newEnd], state.scale.range())
+        ...changeDomainAndScaleWithFullDomainLimit(state.scale, [newStart, newEnd], state.fullDomain)
       }
     }
     case ZOOM:
@@ -82,8 +92,7 @@ const reducer = (state, action) => {
 
       return {
         ...state,
-        domain: [newStart, newEnd],
-        scale: scaleTime([newStart, newEnd], state.scale.range()),
+        ...changeDomainAndScaleWithFullDomainLimit(state.scale, [newStart, newEnd], state.fullDomain)
       };
   }
 };
@@ -143,3 +152,6 @@ const TimelineProvider = ({ children }) => {
 
 export { TimelineProvider };
 export default TimelineContext;
+
+
+

@@ -4,12 +4,12 @@ import VitalsDiagram from "./VitalsDiagram/components/VitalsDiagram";
 import { TimelineProvider } from "./contexts/timelineContext";
 import { BufferWidthProvider } from "./contexts/bufferContext";
 
-import series from "./assets/series.json";
+// import series from "./assets/series.json";
 
 export default function App() {
   return (
     <div>
-      <BufferWidthProvider width={1500}>
+      <BufferWidthProvider width={1920}>
         <TimelineProvider>
           <Timeline
             startTime={new Date(2020, 1, 15)}

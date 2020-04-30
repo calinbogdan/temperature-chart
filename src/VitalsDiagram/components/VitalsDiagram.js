@@ -10,6 +10,8 @@ import TimelineContext from "../../contexts/timelineContext";
 import AxisContainer from "./AxisContainer";
 import Series from "./Series";
 
+import { AxisBottom } from "d3-components";
+
 const Container = styled.div`
   display: flex;
   flex-direction: row;
@@ -22,7 +24,7 @@ const withHighlightedLast = (series, highlightedId) => [
 
 const VitalsDiagram = ({ series }) => {
   const { diagramWidth, setSeriesNumber } = useContext(BufferWidthContext);
-  const { drag, zoom } = useContext(TimelineContext);
+  const { drag, zoom, timeScale } = useContext(TimelineContext);
   const rectRef = useRef();
 
   useEffect(() => {
@@ -63,6 +65,7 @@ const VitalsDiagram = ({ series }) => {
               <React.Fragment>
                 <AxisContainer series={series} />
                 <svg width={diagramWidth} height={300}>
+                  <AxisBottom scale={timeScale} tickSize={300} color="#eee"/>
                   <g>
                     {withHighlightedLast(series, highlightedId).map((data) => (
                       <Series key={data.id} id={data.id} data={data} />

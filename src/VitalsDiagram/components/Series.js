@@ -1,12 +1,13 @@
-import React, { useEffect, useContext, useState, memo, useMemo } from 'react';
+import React, { useEffect, useContext, useState, memo, useMemo } from "react";
 import styled from "styled-components";
 import { scaleLinear, line } from "d3";
+
+import { Line } from "d3-components";
 
 import HighlightContext from "../contexts/highlightContext";
 import TimelineContext from "../../contexts/timelineContext";
 
-
-const Line = styled.path`
+const StyledLine = styled.path`
   fill: none;
   stroke: ${(props) => props.color};
   stroke-width: ${(props) => (props.highlighted ? 2 : 0.5)};
@@ -28,7 +29,6 @@ const Circle = memo(({ cx, cy, fill, value }) => {
     </g>
   );
 });
-
 
 const Series = ({ id, data }) => {
   const { highlightedId } = useContext(HighlightContext);
@@ -58,18 +58,25 @@ const Series = ({ id, data }) => {
     );
   });
 
-  const lineAs = line()
-    .y((_, i) => pointsY[i])
-    .x((_, i) => pointsX[i]);
+  const intervalIsLowEnough =
+    timeScale.domain()[1].getTime() - timeScale.domain()[0].getTime() <=
+    1000 * 3600 * 10;
 
   return (
     <g id={id}>
-      <Line
+      {/* <StyledLine
         highlighted={highlightedId === data.id}
         color={data.color}
         d={lineAs(data.values)}
+      /> */}
+      <Line
+        x={(d) => timeScale(d.time)}
+        y={(d) => scale(d.value)}
+        points={data.values}
+        color={data.color}
+        highlighted={highlightedId === data.id}
       />
-      {highlightedId === data.id && timeScale.domain()[1].getTime() - timeScale.domain()[0].getTime() && (
+      {highlightedId === data.id && intervalIsLowEnough && (
         <g>
           {renderables.map((entry, index) => (
             <g key={index}>
