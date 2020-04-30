@@ -1,23 +1,19 @@
 import React, { useRef, useEffect } from "react";
-import styled from "styled-components";
 import { select } from "d3-selection";
 import { axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
-
-const DiagramContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
+import styled from "styled-components";
 
 const AxisWrapper = styled.svg`
   .tick:last-of-type > text {
-    transform: translateY(4px);
+    transform: translateY(3px);
   }
   .tick:first-of-type > text {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
   }
 `;
 
+const AXIS_WIDTH = 40;
 const Axis = ({ low, high, height }) => {
   const axisRef = useRef();
 
@@ -28,8 +24,8 @@ const Axis = ({ low, high, height }) => {
   }, []);
 
   return (
-    <AxisWrapper height={height - 1} width={40}>
-      <g transform="translate(40 0)" ref={axisRef} />
+    <AxisWrapper height={height - 1} width={AXIS_WIDTH}>
+      <g transform={`translate(${AXIS_WIDTH - 1} 0)`} ref={axisRef} />
     </AxisWrapper>
   );
 };
@@ -48,19 +44,4 @@ const AxesContainer = () => {
   );
 };
 
-const SeriesContainer = () => (
-  <svg>
-    <rect height="100%" width="100%" />
-  </svg>
-);
-
-const VitalsDiagram = (props) => {
-  return (
-    <DiagramContainer>
-      <AxesContainer />
-      <SeriesContainer />
-    </DiagramContainer>
-  );
-};
-
-export default VitalsDiagram;
+export default AxesContainer;
