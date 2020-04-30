@@ -5,6 +5,7 @@ import { line } from "d3-shape";
 import AxesContainer from "./AxesContainer";
 import TimelineContext from "components/timelineContext";
 import { scaleTime, scaleLinear } from "d3-scale";
+import BufferContext from "../../bufferContext";
 
 const SeriesLine = styled.path`
   fill: none;
@@ -13,8 +14,9 @@ const SeriesLine = styled.path`
 
 const Series = ({ color, data, valueAccessor, dateAccessor, high, low, height }) => {
   const { domain } = useContext(TimelineContext);
+  const { bufferWidth, width } = useContext(BufferContext);
 
-  const xScale = scaleTime(domain, [0, 1000]);
+  const xScale = scaleTime(domain, [0, width - bufferWidth]);
   const yScale = scaleLinear([low, high], [height, 0]);
   const lineWith = line()
     .x((d) => xScale(new Date(dateAccessor(d))))
@@ -33,13 +35,14 @@ const DiagramContainer = styled.div`
 `;
 
 const VitalsDiagram = (props) => {
+  const { bufferWidth, width } = useContext(BufferContext);
   return (
     <DiagramContainer>
       <AxesContainer
         height={props.height}
         series={Children.map(props.children, (c) => c.props)}
       />
-      <svg height={props.height} width={props.width - Children.count(props.children) * 40}>
+      <svg height={props.height} width={width - bufferWidth}>
         {props.children}
       </svg>
     </DiagramContainer>

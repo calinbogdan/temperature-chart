@@ -1,46 +1,35 @@
-import React, { useRef, useEffect, useState, useReducer, createContext, useContext } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { axisTop } from "d3-axis";
-import { select } from "d3-selection";
-import { scaleTime } from "d3-scale";
 
 import TimelineContext from "./timelineContext";
+import BufferContext from "./bufferContext";
 
-const TIMELINE_HEIGHT = 40;
+import Timeline from "./Timeline";
 
-const Timeline = ({ width }) => {
-  const { domain } = useContext(TimelineContext);
-  const axisRef = useRef();
-
-  useEffect(() => {
-    select(axisRef.current).call(
-      axisTop(scaleTime(domain, [0, width]).nice())
-    );
-  }, []);
-
-  return (
-    <svg height={TIMELINE_HEIGHT} width={width}>
-      <rect height="100%" width="100%" fill="#ddd" />
-      <g transform={`translate(0 ${TIMELINE_HEIGHT - 1})`} ref={axisRef} />
-    </svg>
-  );
-};
-
+const AXIS_WIDTH = 40;
 const Context = (props) => {
   const [domain, setDomain] = useState([props.startDate, props.endDate]);
+  const [bufferWidth, setBufferWidth] = useState(0);
 
   return (
     <div>
-      <TimelineContext.Provider value={{domain}}>
-        <Timeline width={props.width} />
-        {props.children}
-      </TimelineContext.Provider>
+      <BufferContext.Provider
+        value={{
+          width: props.width, 
+          bufferWidth,
+          setSeriesCount: (count) => setBufferWidth(count * AXIS_WIDTH),
+        }}
+      >
+        <TimelineContext.Provider value={{ domain }}>
+          <Timeline width={props.width} />
+          {props.children}
+        </TimelineContext.Provider>
+      </BufferContext.Provider>
     </div>
   );
 };
 
 Context.propTypes = {
-  height: PropTypes.number,
   width: PropTypes.number,
 };
 
