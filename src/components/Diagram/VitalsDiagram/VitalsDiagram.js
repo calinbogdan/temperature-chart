@@ -60,8 +60,6 @@ const VitalsDiagram = (props) => {
     }
   });
 
-  console.log(timeScale.range());
-
   const onMouseMoveListener = useCallback((e) => {
     if (e.buttons > 0) {
       drag(e.movementX);
