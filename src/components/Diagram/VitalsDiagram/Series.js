@@ -4,7 +4,7 @@ import { scaleLinear, line } from "d3";
 
 import { Line } from "d3-components";
 
-import HighlightContext from "../contexts/highlightContext";
+import HighlightContext from "../../../VitalsDiagram/contexts/highlightContext";
 import TimelineContext from "../../contexts/timelineContext";
 
 const StyledLine = styled.path`

@@ -1,29 +1,30 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
-import TimelineContext from "./timelineContext";
+// import TimelineContext from "./timelineContext";
 import BufferContext from "./bufferContext";
 
 import Timeline from "./Timeline";
+import { TimelineProvider } from "./timelineContext";
 
 const AXIS_WIDTH = 40;
 const Context = (props) => {
-  const [domain, setDomain] = useState([props.startDate, props.endDate]);
   const [bufferWidth, setBufferWidth] = useState(0);
 
   return (
     <div>
       <BufferContext.Provider
         value={{
-          width: props.width, 
+          width: props.width,
           bufferWidth,
+          diagramWidth: props.width - bufferWidth,
           setSeriesCount: (count) => setBufferWidth(count * AXIS_WIDTH),
         }}
       >
-        <TimelineContext.Provider value={{ domain }}>
+        <TimelineProvider startDate={props.startDate} endDate={props.endDate}>
           <Timeline width={props.width} />
           {props.children}
-        </TimelineContext.Provider>
+        </TimelineProvider>
       </BufferContext.Provider>
     </div>
   );
