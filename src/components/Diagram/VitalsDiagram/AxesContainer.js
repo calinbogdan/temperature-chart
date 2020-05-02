@@ -33,7 +33,7 @@ const Axis = ({ low, high, height, color }) => {
 
   return (
     <AxisWrapper height={height - 1} width={AXIS_WIDTH}>
-      {/* <rect fill={color} height={height} width={AXIS_WIDTH} fillOpacity={0.2}/> */}
+      {/* <rect fill={color} height={height} width={AXIS_WIDTH} fillOpacity={0.1}/> */}
       <g color={color} transform={`translate(${AXIS_WIDTH - 1} 0)`} ref={axisRef} />
     </AxisWrapper>
   );
@@ -45,12 +45,7 @@ const Container = styled.div`
   flex-direction: row;
 `;
 
-const AxesContainer = ({ height, series }) => {
-  const { setSeriesCount } = useContext(BufferContext);
-
-  useEffect(() => { 
-    setSeriesCount(series.length);
-  }, [series.length]);
+const AxesContainer = ({ series }) => {
   return (
     <Container>
       {series.map((serieProps, index) => <Axis key={index} {...serieProps} />)}

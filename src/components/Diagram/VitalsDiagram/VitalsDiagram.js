@@ -46,6 +46,7 @@ const Series = ({
 const DiagramContainer = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: flex-end;
 `;
 
 const VitalsDiagram = (props) => {
