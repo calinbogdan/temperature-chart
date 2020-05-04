@@ -6,16 +6,21 @@ import BufferContext from "./bufferContext";
 
 import Timeline from "./Timeline";
 import { TimelineProvider } from "./timelineContext";
+import styled from "styled-components";
 
 const AXIS_WIDTH = 40;
 const MEDICATION_BUFFER_WIDTH = 200;
+
+const ContextWrapper = styled.div`
+  display: block;
+  max-width: ${props => props.width}px;
+`;
 
 const Context = (props) => {
   const [bufferWidth, setBufferWidth] = useState(0);
 
   useEffect(() => {
     const children = Children.toArray(props.children);
-    console.log(children);
     
     const medicationBufferWidth = anyMedicationDiagram(children) ? MEDICATION_BUFFER_WIDTH : 0;
     const vitalsAxesLengths = children.map(diagram => {
@@ -29,7 +34,7 @@ const Context = (props) => {
   }, [props.children]);
 
   return (
-    <div>
+    <ContextWrapper width={props.width}>
       <BufferContext.Provider
         value={{
           width: props.width,
@@ -42,7 +47,7 @@ const Context = (props) => {
           {props.children}
         </TimelineProvider>
       </BufferContext.Provider>
-    </div>
+    </ContextWrapper>
   );
 };
 
