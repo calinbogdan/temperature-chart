@@ -29,7 +29,7 @@ const Timeline = ({ width }) => {
   }, [timeScale]);
 
   return (
-    <svg overflow="visible" height={TIMELINE_HEIGHT} width={width}>
+    <svg overflow="visible" height={TIMELINE_HEIGHT} width={width} style={{display: 'block'}}>
       <rect height="100%" width="100%" fill="#ddd" />
       <Ticks
         color="#ddd"
