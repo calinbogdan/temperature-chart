@@ -43,11 +43,15 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   flex-direction: row;
+  justify-content: flex-end;
+  width: ${props => props.width}px;
+  flex: 0 0 ${props => props.width}px;
 `;
 
 const AxesContainer = ({ series }) => {
+  const { bufferWidth } = useContext(BufferContext);
   return (
-    <Container>
+    <Container width={bufferWidth}>
       {series.map((serieProps, index) => <Axis key={index} {...serieProps} />)}
     </Container>
   );
