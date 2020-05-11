@@ -33,7 +33,7 @@ const MedicationOrderContent = styled.svg`
   display: inline-block;
 `;
 
-const MedicationContinousInfusion = styled.rect`
+const MedicationOrderBackground = styled.rect`
   fill: #dbf1ff;
   stroke: #888;
   stroke-width: 0.25;
@@ -43,12 +43,6 @@ const DiagramWrapper = styled.div`
   border-top: 1px solid #999;
 `;
 
-// DATA
-const medOrder = {
-  start: new Date("16 Feb 2020 17:00"),
-  end: new Date("17 Feb 2020 05:00"),
-};
-
 const ContinousInfusion = (props) => {
   const { timeScale } = useContext(TimelineContext);
 
@@ -57,7 +51,7 @@ const ContinousInfusion = (props) => {
 
   return (
     <g>
-      <MedicationContinousInfusion
+      <MedicationOrderBackground
         height={ORDER_BAR_HEIGHT}
         y={ORDER_HEIGHT - ORDER_BAR_HEIGHT}
         x={x}
@@ -68,7 +62,7 @@ const ContinousInfusion = (props) => {
         x2={x + width}
         y1={ORDER_HEIGHT - ORDER_BAR_HEIGHT / 2}
         y2={ORDER_HEIGHT - ORDER_BAR_HEIGHT / 2}
-        stroke="#999"
+        stroke="#555"
         strokeDasharray="4 2 1 2 4 8"
       />
     </g>
@@ -79,37 +73,86 @@ ContinousInfusion.propTypes = {
   interval: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
 };
 
-const IntermittentInfusion = (props) => {
-  const { timeScale } = useContext(TimelineContext);
-
-  const x = timeScale(props.interval[0]);
-  const width = timeScale(props.interval[1]) - timeScale(props.interval[0]);
-
-  const unixStart = props.interval[0].getTime();
-  const unixEnd = props.interval[1].getTime();
-  const step = props.minutesSpan * 60 * 1000;
+function administrationTimes(interval, span) {
+  const unixStart = interval[0].getTime();
+  const unixEnd = interval[1].getTime();
+  const step = span * 60 * 1000;
 
   const dates = [];
 
   for (let i = unixStart; i <= unixEnd; i += step) {
     dates.push(new Date(i));
   }
+  return dates;
+}
+
+const IntermittentInfusion = (props) => {
+  const { timeScale } = useContext(TimelineContext);
+
+  const x = timeScale(props.interval[0]);
+  const width = timeScale(props.interval[1]) - timeScale(props.interval[0]);
+
   return (
     <g>
-      <MedicationContinousInfusion
+      <MedicationOrderBackground
         height={ORDER_BAR_HEIGHT}
         y={ORDER_HEIGHT - ORDER_BAR_HEIGHT}
         x={x}
         width={width}
       />
-      {dates.map((date, index) => {
-        return <polygon key={index} transform={`translate(${timeScale(date)} 32)`} points="0,0 5,8 0,16 -5,8" />
-      })}
+      {administrationTimes(props.interval, props.minutesSpan).map(
+        (date, index) => {
+          return (
+            <polygon
+              key={index}
+              transform={`translate(${timeScale(date)} 32)`}
+              fill="#555"
+              points="0,0 5,8 0,16 -5,8"
+            />
+          );
+        }
+      )}
     </g>
   );
 };
 
 IntermittentInfusion.propTypes = {
+  interval: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
+  minutesSpan: PropTypes.number.isRequired,
+};
+
+const Peroral = (props) => {
+  const { timeScale } = useContext(TimelineContext);
+
+  const x = timeScale(props.interval[0]);
+  const width = timeScale(props.interval[1]) - timeScale(props.interval[0]);
+  return (
+    <g>
+      <MedicationOrderBackground
+        height={ORDER_BAR_HEIGHT}
+        y={ORDER_HEIGHT - ORDER_BAR_HEIGHT}
+        x={x}
+        width={width}
+      />
+      {administrationTimes(props.interval, props.minutesSpan).map(
+        (date, index) => {
+          return (
+            <circle
+              key={index}
+              fill="#555"
+              transform={`translate(${timeScale(date)} 30)`}
+              cx="0"
+              cy="10"
+              r="5"
+            />
+          );
+        }
+      )}
+    </g>
+  );
+};
+
+Peroral.propTypes = {
   interval: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
   minutesSpan: PropTypes.number.isRequired,
 };
@@ -124,6 +167,10 @@ function componentForOrderType(order) {
           interval={order.interval}
           minutesSpan={order.minutesSpan}
         />
+      );
+    case "peroral":
+      return (
+        <Peroral interval={order.interval} minutesSpan={order.minutesSpan} />
       );
   }
 }
