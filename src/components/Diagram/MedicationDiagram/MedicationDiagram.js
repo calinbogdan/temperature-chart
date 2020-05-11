@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import PropTypes from "prop-types";
 import BufferContext from "../../bufferContext";
 import styled from "styled-components";
 import TimelineContext from "../../timelineContext";
@@ -48,24 +49,50 @@ const medOrder = {
   end: new Date("17 Feb 2020 05:00"),
 };
 
-const ContinousInfusion = (props) => (
+const ContinousInfusion = (props) => {
+  const { timeScale } = useContext(TimelineContext);
+
+  const x = timeScale(props.interval[0]);
+  const width = timeScale(props.interval[1]) - timeScale(props.interval[0]);
+
+  return (
+    <g>
+      <MedicationContinousInfusion
+        height={ORDER_BAR_HEIGHT}
+        y={ORDER_HEIGHT - ORDER_BAR_HEIGHT}
+        x={x}
+        width={width}
+      />
+      <line
+        x1={x}
+        x2={x + width}
+        y1={ORDER_HEIGHT - ORDER_BAR_HEIGHT / 2}
+        y2={ORDER_HEIGHT - ORDER_BAR_HEIGHT / 2}
+        stroke="#999"
+        strokeDasharray="4 2 1 2 4 8"
+      />
+    </g>
+  );
+};
+
+ContinousInfusion.propTypes = {
+  interval: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
+};
+
+const IntermittentInfusion = (props) => (
   <g>
-    <MedicationContinousInfusion
-      height={ORDER_BAR_HEIGHT}
-      y={ORDER_HEIGHT - ORDER_BAR_HEIGHT}
-      x={props.x}
-      width={props.width}
-    />
-    <line
-      x1={props.x}
-      x2={props.x + props.width}
-      y1={ORDER_HEIGHT - ORDER_BAR_HEIGHT / 2}
-      y2={ORDER_HEIGHT - ORDER_BAR_HEIGHT / 2}
-      stroke="#999"
-      strokeDasharray="4 2 1 2 4 8"
-    />
+    <polygon points="" />
   </g>
 );
+
+function componentForOrderType(order) {
+  switch (order.type) {
+    case "continous":
+      return ContinousInfusion;
+    case "intermittent":
+      return IntermittentInfusion;
+  }
+}
 
 const MedicationDiagram = ({ orders }) => {
   const { bufferWidth, diagramWidth } = useContext(BufferContext);
@@ -80,7 +107,7 @@ const MedicationDiagram = ({ orders }) => {
               <MedicationOrderTitle>{order.medication}</MedicationOrderTitle>
             </MedicationOrderHeader>
             <MedicationOrderContent height={ORDER_HEIGHT} width={diagramWidth}>
-              <ContinousInfusion x={timeScale(medOrder.start)} width={timeScale(medOrder.end) - timeScale(medOrder.start)}/>
+              <ContinousInfusion interval={order.interval} />
             </MedicationOrderContent>
           </MedicationOrderWrapper>
         );
