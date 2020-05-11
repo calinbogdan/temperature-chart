@@ -5,12 +5,12 @@ import { scaleLinear } from "d3-scale";
 import styled from "styled-components";
 import BufferContext from "../../bufferContext";
 
-const AxisWrapper = styled.svg`
+const AxisWrapper = styled.g`
   .tick:last-of-type > text {
-    transform: translateY(3.5px);
+    transform: translateY(4px);
   }
   .tick:first-of-type > text {
-    transform: translateY(-3.5px);
+    transform: translateY(-4px);
   }
   .domain {
     stroke-width: 1.5px;
@@ -35,13 +35,15 @@ const Axis = ({ low, high, height, color }) => {
   }, []);
 
   return (
-    <AxisWrapper height={height - 1} width={AXIS_WIDTH}>
-      <g
-        color={color}
-        transform={`translate(${AXIS_WIDTH - 1} 0)`}
-        ref={axisRef}
-      />
-    </AxisWrapper>
+    <svg height={height - 1} width={AXIS_WIDTH}>
+      <AxisWrapper>
+        <g
+          color={color}
+          transform={`translate(${AXIS_WIDTH - 1} 0)`}
+          ref={axisRef}
+        />
+      </AxisWrapper>
+    </svg>
   );
 };
 
@@ -49,7 +51,7 @@ const PairAxis = (props) => {
   const topAxisRef = useRef();
   const bottomAxisRef = useRef();
 
-  const halfHeight = props.height - 2;
+  const halfHeight = props.height / 2;
 
   useEffect(() => {
     select(topAxisRef.current).call(
@@ -57,6 +59,7 @@ const PairAxis = (props) => {
         .tickSizeOuter(6)
         .tickSizeInner(4)
         .tickPadding(4)
+        .ticks(4)
     );
     select(bottomAxisRef.current).call(
       axisLeft(
@@ -65,13 +68,20 @@ const PairAxis = (props) => {
         .tickSizeOuter(6)
         .tickSizeInner(4)
         .tickPadding(4)
+        .ticks(4)
     );
   }, []);
 
   return (
     <svg height={props.height - 1} width={AXIS_WIDTH}>
-      <g ref={topAxisRef} />
-      <g transform={`translate(0 ${(height - 1) / 2})`} ref={bottomAxisRef} />
+      <g color={props.color} transform="translate(39 0)">
+        <AxisWrapper>
+          <g ref={topAxisRef} />
+        </AxisWrapper>
+        <AxisWrapper>
+          <g transform={`translate(0 ${halfHeight})`} ref={bottomAxisRef} />
+        </AxisWrapper>
+      </g>
     </svg>
   );
 };
