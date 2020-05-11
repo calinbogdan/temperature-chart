@@ -12,30 +12,38 @@ const SeriesLine = styled.path`
   stroke: ${(props) => props.color};
 `;
 
-const Series = ({
+const PairSeries = ({
   color,
-  data,
+  topValues, 
+  bottomValues,
   valueAccessor,
   dateAccessor,
-  high,
-  low,
+  topHigh,
+  topLow,
+  bottomHigh,
+  bottomLow,
   height,
 }) => {
   const { domain } = useContext(TimelineContext);
   const { bufferWidth, width } = useContext(BufferContext);
 
   const xScale = scaleTime(domain, [0, width - bufferWidth]);
-  const yScale = scaleLinear([low, high], [height, 0]);
-  
-  const lineWith = line()
-    .x((d) => xScale(new Date(dateAccessor(d))))
-    .y((d) => yScale(valueAccessor(d)));
 
-  return (
-    <g>
-      <SeriesLine color={color} d={lineWith(data)} />
-    </g>
-  );
+  const yTopScale = scaleLinear([topLow, topHigh], [height, height / 2]);
+  const yBottomScale = scaleLinear([bottomLow, bottomHigh], [height / 2, 0]);
+
+  const topLine = line()
+    .x((d) => xScale(new Date(dateAccessor(d))))
+    .y(d => yTopScale(valueAccessor(d)));
+
+  const bottomLine = line()
+  .x((d) => xScale(new Date(dateAccessor(d))))
+  .y(d => yBottomScale(valueAccessor(d)));
+
+  return <g>
+    <SeriesLine color={color} d={topLine(topValues)}/>
+    <SeriesLine color={color} d={bottomLine(bottomValues)}/>
+  </g>;
 };
 
-export default Series;
+export default PairSeries;
