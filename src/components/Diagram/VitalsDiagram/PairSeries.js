@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
 
-import { line } from "d3-shape";
+import { line, area } from "d3-shape";
 import { scaleTime, scaleLinear } from "d3-scale";
 
 import BufferContext from "../../bufferContext";
@@ -12,9 +12,16 @@ const SeriesLine = styled.path`
   stroke: ${(props) => props.color};
 `;
 
+function getGrouped(top, bottom) {
+  return top.map((value, index) => ({
+    top: value,
+    bottom: bottom[index],
+  }));
+}
+
 const PairSeries = ({
   color,
-  topValues, 
+  topValues,
   bottomValues,
   valueAccessor,
   dateAccessor,
@@ -23,6 +30,7 @@ const PairSeries = ({
   bottomHigh,
   bottomLow,
   height,
+  areaVisible,
 }) => {
   const { domain } = useContext(TimelineContext);
   const { bufferWidth, width } = useContext(BufferContext);
@@ -34,16 +42,35 @@ const PairSeries = ({
 
   const topLine = line()
     .x((d) => xScale(new Date(dateAccessor(d))))
-    .y(d => yTopScale(valueAccessor(d)));
+    .y((d) => yTopScale(valueAccessor(d)));
 
   const bottomLine = line()
-  .x((d) => xScale(new Date(dateAccessor(d))))
-  .y(d => yBottomScale(valueAccessor(d)));
+    .x((d) => xScale(new Date(dateAccessor(d))))
+    .y((d) => yBottomScale(valueAccessor(d)));
 
-  return <g>
-    <SeriesLine color={color} d={topLine(topValues)}/>
-    <SeriesLine color={color} d={bottomLine(bottomValues)}/>
-  </g>;
+  if (areaVisible) {
+    const areaGen = area()
+      .x((d) => xScale(new Date(dateAccessor(d.top))))
+      .y0((d) => yBottomScale(valueAccessor(d.bottom)))
+      .y1((d) => yTopScale(valueAccessor(d.top)));
+
+    const grouped = getGrouped(topValues, bottomValues);
+
+    return (
+      <g>
+        <SeriesLine color={color} d={topLine(topValues)} />
+        {areaVisible && <path fill={color} opacity={0.6} d={areaGen(grouped)} />}
+        <SeriesLine color={color} d={bottomLine(bottomValues)} />
+      </g>
+    );
+  }
+
+  return (
+    <g>
+      <SeriesLine color={color} d={topLine(topValues)} />
+      <SeriesLine color={color} d={bottomLine(bottomValues)} />
+    </g>
+  );
 };
 
 export default PairSeries;
