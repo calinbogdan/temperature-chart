@@ -78,6 +78,7 @@ const PairAxis = (props) => {
         <AxisWrapper>
           <g ref={topAxisRef} />
         </AxisWrapper>
+        <line stroke={props.color} strokeWidth={0.5} x1={-AXIS_WIDTH} x2={0} y1={halfHeight} y2={halfHeight}/>
         <AxisWrapper>
           <g transform={`translate(0 ${halfHeight})`} ref={bottomAxisRef} />
         </AxisWrapper>
