@@ -15,17 +15,6 @@ const DRAG = "DRAG";
 const SCALE_RANGE_CHANGED = "SCALE_RANGE_CHANGED";
 
 
-function changeDomainAndScaleWithFullDomainLimit(scale, domain, fullDomain) {
-  const fullInterval = fullDomain[1].getTime() - fullDomain[0].getTime();
-  const interval = domain[1].getTime() - domain[0].getTime();
-
-  const newDomain = fullInterval >= interval ? domain : fullDomain;
-  return {
-    scale: scaleTime(newDomain, scale.range()),
-    domain: newDomain
-  };
-}
-
 const reducer = (state, action) => {
   switch (action.type) {
     case FULL_DOMAIN_CHANGE:
