@@ -3,30 +3,40 @@ import PropTypes from "prop-types";
 import BufferContext from "../../bufferContext";
 import styled from "styled-components";
 import TimelineContext from "../../timelineContext";
+import TimelineController from "../TimelineController";
+import Peroral from "./Peroral";
 
 const ORDER_HEIGHT = 50;
 const ORDER_BAR_HEIGHT = 20;
 
-const MedicationOrderHeader = styled.div`
-  display: inline-block;
-  width: ${(props) => props.width}px;
-  flex: 0 0 ${(props) => props.width}px;
-  padding: 8px 12px;
-  background: #ddd;
+const DiagramHeader = styled.div`
+  display: inline-flex;
+  flex-direction: column;
+  width: ${(props) => props.width};
+`;
+const DiagramContent = styled.div`
+  display: inline-flex;
+  flex-direction: column;
+  border-top: 1px solid #999;
+`;
+
+const DiagramWrapper = styled.div`
+  display: flex;
   box-sizing: border-box;
-  height: 50px;
 `;
 
 const MedicationOrderTitle = styled.p`
   margin: 0;
 `;
 
-const MedicationOrderWrapper = styled.div`
+const MedicationOrderWrapper = styled.svg`
   display: flex;
   flex-direction: row;
   box-sizing: border-box;
-  border: 1px solid #999;
-  border-top: 0px;
+
+  &:nth-of-type(2n) {
+    background: #fcfcfc;
+  }
 `;
 
 const MedicationOrderContent = styled.svg`
@@ -37,10 +47,6 @@ const MedicationOrderBackground = styled.rect`
   fill: #dbf1ff;
   stroke: #888;
   stroke-width: 0.25;
-`;
-
-const DiagramWrapper = styled.div`
-  border-top: 1px solid #999;
 `;
 
 const ContinousInfusion = (props) => {
@@ -72,19 +78,6 @@ const ContinousInfusion = (props) => {
 ContinousInfusion.propTypes = {
   interval: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
 };
-
-function administrationTimes(interval, span) {
-  const unixStart = interval[0].getTime();
-  const unixEnd = interval[1].getTime();
-  const step = span * 60 * 1000;
-
-  const dates = [];
-
-  for (let i = unixStart; i <= unixEnd; i += step) {
-    dates.push(new Date(i));
-  }
-  return dates;
-}
 
 const IntermittentInfusion = (props) => {
   const { timeScale } = useContext(TimelineContext);
@@ -121,42 +114,6 @@ IntermittentInfusion.propTypes = {
   minutesSpan: PropTypes.number.isRequired,
 };
 
-const Peroral = (props) => {
-  const { timeScale } = useContext(TimelineContext);
-
-  const x = timeScale(props.interval[0]);
-  const width = timeScale(props.interval[1]) - timeScale(props.interval[0]);
-  return (
-    <g>
-      <MedicationOrderBackground
-        height={ORDER_BAR_HEIGHT}
-        y={ORDER_HEIGHT - ORDER_BAR_HEIGHT}
-        x={x}
-        width={width}
-      />
-      {administrationTimes(props.interval, props.minutesSpan).map(
-        (date, index) => {
-          return (
-            <circle
-              key={index}
-              fill="#555"
-              transform={`translate(${timeScale(date)} 30)`}
-              cx="0"
-              cy="10"
-              r="5"
-            />
-          );
-        }
-      )}
-    </g>
-  );
-};
-
-Peroral.propTypes = {
-  interval: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
-  minutesSpan: PropTypes.number.isRequired,
-};
-
 function componentForOrderType(order) {
   switch (order.type) {
     case "continous":
@@ -174,24 +131,54 @@ function componentForOrderType(order) {
       );
   }
 }
+function administrationTimes(interval, span) {
+  const unixStart = interval[0].getTime();
+  const unixEnd = interval[1].getTime();
+  const step = span * 60 * 1000;
+
+  const dates = [];
+
+  for (let i = unixStart; i <= unixEnd; i += step) {
+    dates.push(new Date(i));
+  }
+  return dates;
+}
 
 const MedicationDiagram = ({ orders }) => {
   const { bufferWidth, diagramWidth } = useContext(BufferContext);
 
   return (
     <DiagramWrapper>
-      {orders.map((order, index) => {
-        return (
-          <MedicationOrderWrapper key={index}>
-            <MedicationOrderHeader width={bufferWidth}>
-              <MedicationOrderTitle>{order.medication}</MedicationOrderTitle>
-            </MedicationOrderHeader>
-            <MedicationOrderContent height={ORDER_HEIGHT} width={diagramWidth}>
-              {componentForOrderType(order)}
-            </MedicationOrderContent>
-          </MedicationOrderWrapper>
-        );
-      })}
+      {/* <DiagramHeader width={bufferWidth}>
+        {orders.map((order, index) => (
+        ))}
+      </DiagramHeader> */}
+      <DiagramContent>
+        {orders.map((order, index) => {
+          return (
+            <MedicationOrderWrapper key={index}>
+              <svg key={index} width={bufferWidth} height={50}>
+                <rect height="100%" width="100%" fill="#eee" />
+                <foreignObject height="100%" width="100%">
+                  <MedicationOrderTitle>
+                    {order.medication}
+                  </MedicationOrderTitle>
+                </foreignObject>
+              </svg>
+              <MedicationOrderContent
+                height={ORDER_HEIGHT}
+                width={diagramWidth}
+              >
+                {componentForOrderType(order)}
+              </MedicationOrderContent>
+            </MedicationOrderWrapper>
+          );
+        })}
+        <TimelineController
+          height={ORDER_HEIGHT * orders.length}
+          width={diagramWidth}
+        />
+      </DiagramContent>
     </DiagramWrapper>
   );
 };
