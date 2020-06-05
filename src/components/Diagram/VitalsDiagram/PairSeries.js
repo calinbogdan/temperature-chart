@@ -23,8 +23,6 @@ const PairSeries = ({
   color,
   topValues,
   bottomValues,
-  valueAccessor,
-  dateAccessor,
   topHigh,
   topLow,
   bottomHigh,
@@ -41,18 +39,18 @@ const PairSeries = ({
   const yBottomScale = scaleLinear([bottomLow, bottomHigh], [height / 2, 0]);
 
   const topLine = line()
-    .x((d) => xScale(new Date(dateAccessor(d))))
-    .y((d) => yTopScale(valueAccessor(d)));
+    .x((d) => xScale(new Date(d.time)))
+    .y((d) => yTopScale(d.value));
 
   const bottomLine = line()
-    .x((d) => xScale(new Date(dateAccessor(d))))
-    .y((d) => yBottomScale(valueAccessor(d)));
+    .x((d) => xScale(new Date(d.time)))
+    .y((d) => yBottomScale(d.value));
 
   if (areaVisible) {
     const areaGen = area()
-      .x((d) => xScale(new Date(dateAccessor(d.top))))
-      .y0((d) => yBottomScale(valueAccessor(d.bottom)))
-      .y1((d) => yTopScale(valueAccessor(d.top)));
+      .x((d) => xScale(new Date(d.top.date)))
+      .y0((d) => yBottomScale(d.bottom.value))
+      .y1((d) => yTopScale(d.top.value));
 
     const grouped = getGrouped(topValues, bottomValues);
 

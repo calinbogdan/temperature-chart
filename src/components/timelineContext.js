@@ -75,6 +75,8 @@ const reducer = (state, action) => {
       }
       
       // prevent the user from zooming out more than the full domain
+      
+      // TODO prevent the timeline from zooming out ouside the domain
 
       const fullInterval = state.fullDomain[1].getTime() - state.fullDomain[0].getTime();
       const interval = newEnd.getTime() - newStart.getTime();

@@ -9,14 +9,14 @@ import Peroral from "./Peroral";
 const ORDER_HEIGHT = 50;
 const ORDER_BAR_HEIGHT = 20;
 
-const DiagramHeader = styled.div`
-  display: inline-flex;
-  flex-direction: column;
-  width: ${(props) => props.width};
+const ControllerLayer = styled.div`
+  position: absolute;
+  z-index: 2;
+  transform: translateX(${props => props.offsetX}px);
 `;
+
 const DiagramContent = styled.div`
-  display: inline-flex;
-  flex-direction: column;
+  display: block;
   border-top: 1px solid #999;
 `;
 
@@ -37,10 +37,6 @@ const MedicationOrderWrapper = styled.svg`
   &:nth-of-type(2n) {
     background: #fcfcfc;
   }
-`;
-
-const MedicationOrderContent = styled.svg`
-  display: inline-block;
 `;
 
 const MedicationOrderBackground = styled.rect`
@@ -144,40 +140,50 @@ function administrationTimes(interval, span) {
   return dates;
 }
 
+const MedicationOrderHeader = (props) => (
+  <svg width={props.width} height={props.height}>
+    <rect height="100%" width="100%" fill="#eee" />
+    <foreignObject height="100%" width="100%">
+      <MedicationOrderTitle>{props.text}</MedicationOrderTitle>
+    </foreignObject>
+  </svg>
+);
+
 const MedicationDiagram = ({ orders }) => {
-  const { bufferWidth, diagramWidth } = useContext(BufferContext);
+  const { bufferWidth, diagramWidth, width } = useContext(BufferContext);
 
   return (
     <DiagramWrapper>
-      {/* <DiagramHeader width={bufferWidth}>
-        {orders.map((order, index) => (
-        ))}
-      </DiagramHeader> */}
       <DiagramContent>
-        {orders.map((order, index) => {
-          return (
-            <MedicationOrderWrapper key={index}>
-              <svg key={index} width={bufferWidth} height={50}>
-                <rect height="100%" width="100%" fill="#eee" />
-                <foreignObject height="100%" width="100%">
-                  <MedicationOrderTitle>
-                    {order.medication}
-                  </MedicationOrderTitle>
-                </foreignObject>
-              </svg>
-              <MedicationOrderContent
+        <div style={{
+          position: "absolute"
+        }}>
+          {orders.map((order, index) => {
+            return (
+              <MedicationOrderWrapper
                 height={ORDER_HEIGHT}
-                width={diagramWidth}
+                width={width}
+                key={index}
               >
-                {componentForOrderType(order)}
-              </MedicationOrderContent>
-            </MedicationOrderWrapper>
-          );
-        })}
-        <TimelineController
-          height={ORDER_HEIGHT * orders.length}
-          width={diagramWidth}
-        />
+                <svg
+                  height={ORDER_HEIGHT}
+                  width={diagramWidth}
+                  transform={`translate(${bufferWidth} 0)`}
+                  overflow="visible"
+                >
+                  {componentForOrderType(order)}
+                </svg>
+                <MedicationOrderHeader width={bufferWidth} height={ORDER_HEIGHT} text={order.medication} />
+              </MedicationOrderWrapper>
+            );
+          })}
+        </div>
+        <ControllerLayer offsetX={bufferWidth}>
+          <TimelineController
+            height={ORDER_HEIGHT * orders.length}
+            width={diagramWidth}
+          />
+        </ControllerLayer>
       </DiagramContent>
     </DiagramWrapper>
   );

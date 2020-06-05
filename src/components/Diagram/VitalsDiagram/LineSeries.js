@@ -12,11 +12,9 @@ const SeriesLine = styled.path`
   stroke: ${(props) => props.color};
 `;
 
-const Series = ({
+const LineSeries = ({
   color,
-  data,
-  valueAccessor,
-  dateAccessor,
+  values,
   high,
   low,
   height,
@@ -28,14 +26,14 @@ const Series = ({
   const yScale = scaleLinear([low, high], [height, 0]);
   
   const lineWith = line()
-    .x((d) => xScale(new Date(dateAccessor(d))))
-    .y((d) => yScale(valueAccessor(d)));
+    .x((d) => xScale(new Date(d.time)))
+    .y((d) => yScale(d.value));
 
   return (
     <g>
-      <SeriesLine color={color} d={lineWith(data)} />
+      <SeriesLine color={color} d={lineWith(values)} />
     </g>
   );
 };
 
-export default Series;
+export default LineSeries;

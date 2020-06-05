@@ -17,7 +17,7 @@ const AxisWrapper = styled.g`
   }
 
   text {
-    font: 12px monospace;
+    font: 12px;
   }
 `;
 
@@ -103,13 +103,13 @@ function axisComponentBySeriesType(type) {
   return Axis;
 }
 
-const AxesContainer = ({ series }) => {
+const AxesContainer = ({ series, height }) => {
   const { bufferWidth } = useContext(BufferContext);
   return (
     <Container width={bufferWidth}>
       {series.map((serie, index) => {
         const AxisType = axisComponentBySeriesType(serie.type);
-        return <AxisType key={index} {...serie} />;
+        return <AxisType key={index} height={height} {...serie} />;
       })}
     </Container>
   );
