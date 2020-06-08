@@ -7,8 +7,7 @@ import AxesContainer from "./AxesContainer";
 import LineSeries from "./LineSeries";
 import PairSeries from "./PairSeries";
 import SeriesFocusContext from "./seriesFocusContext";
-
-
+import TimelineContext from "../../timelineContext";
 
 const DiagramContainer = styled.div`
   display: flex;
@@ -16,7 +15,7 @@ const DiagramContainer = styled.div`
   justify-content: flex-end;
 `;
 
-const Series = ({ serie, height, data, high }) => {
+const Series = ({ serie, height, data, focused }) => {
   if (serie.type === "paired") {
     return (
       <PairSeries
@@ -28,6 +27,8 @@ const Series = ({ serie, height, data, high }) => {
         height={height}
         topValues={data.topValues}
         bottomValues={data.bottomValues}
+        focused={focused}
+        areaVisible={true}
       />
     );
   }
@@ -38,9 +39,20 @@ const Series = ({ serie, height, data, high }) => {
       low={serie.low}
       height={height}
       values={data.values}
+      focused={focused}
     />
   );
 };
+
+function focusedLast(series, focusedId) {
+  if (!focusedId) {
+    return series;
+  }
+  return [
+    ...series.filter((s) => s.id !== focusedId),
+    ...series.filter((s) => s.id === focusedId),
+  ];
+}
 
 const VitalsDiagram = (props) => {
   const { diagramWidth } = useContext(BufferContext);
@@ -62,17 +74,15 @@ const VitalsDiagram = (props) => {
       >
         <AxesContainer height={props.height} series={props.series} />
         <svg height={props.height} width={diagramWidth}>
-          <g>
-            {props.series.map((serie, index) => (
-              <Series
-                key={index}
-                serie={serie}
-                height={props.height}
-                data={props.data[index]}
-                focused={focusedSeriesId === serie.id}
-              />
-            ))}
-          </g>
+          {focusedLast(props.series, focusedSeriesId).map((serie, index) => (
+            <Series
+              key={index}
+              serie={serie}
+              height={props.height}
+              data={props.data[serie.id]}
+              focused={focusedSeriesId === serie.id}
+            />
+          ))}
           <TimelineController height={props.height} width={diagramWidth} />
         </svg>
       </SeriesFocusContext.Provider>
