@@ -1,9 +1,12 @@
-import React, { useRef, useEffect, useContext } from "react";
+import React, { useRef, useEffect, useContext, useCallback } from "react";
 import { select } from "d3-selection";
 import { axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import styled from "styled-components";
 import BufferContext from "../../bufferContext";
+import SeriesFocusContext from "./seriesFocusContext";
+
+const AXIS_WIDTH = 40;
 
 const AxisWrapper = styled.g`
   .tick:last-of-type > text {
@@ -17,12 +20,17 @@ const AxisWrapper = styled.g`
   }
 
   text {
-    font: 12px;
+    font-size: 1.25em;
   }
 `;
 
-const AXIS_WIDTH = 40;
-const Axis = ({ low, high, height, color }) => {
+const InteractiveRectangle = styled.rect`
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
+const LineAxis = ({ low, high, height, color, onClick, focused }) => {
   const axisRef = useRef();
 
   useEffect(() => {
@@ -31,11 +39,18 @@ const Axis = ({ low, high, height, color }) => {
         .tickSizeOuter(6)
         .tickSizeInner(4)
         .tickPadding(4)
+        .ticks(5)
     );
   }, []);
 
   return (
     <svg height={height - 1} width={AXIS_WIDTH}>
+      <rect
+        height="100%"
+        width="100%"
+        opacity={0.2}
+        fill={focused ? color : "transparent"}
+      />
       <AxisWrapper>
         <g
           color={color}
@@ -43,6 +58,12 @@ const Axis = ({ low, high, height, color }) => {
           ref={axisRef}
         />
       </AxisWrapper>
+      <InteractiveRectangle
+        height="100%"
+        width="100%"
+        fill="transparent"
+        onClick={onClick}
+      />
     </svg>
   );
 };
@@ -78,7 +99,14 @@ const PairAxis = (props) => {
         <AxisWrapper>
           <g ref={topAxisRef} />
         </AxisWrapper>
-        <line stroke={props.color} strokeWidth={0.5} x1={-AXIS_WIDTH} x2={0} y1={halfHeight} y2={halfHeight}/>
+        <line
+          stroke={props.color}
+          strokeWidth={0.5}
+          x1={-AXIS_WIDTH}
+          x2={0}
+          y1={halfHeight}
+          y2={halfHeight}
+        />
         <AxisWrapper>
           <g transform={`translate(0 ${halfHeight})`} ref={bottomAxisRef} />
         </AxisWrapper>
@@ -96,21 +124,45 @@ const Container = styled.div`
   flex: 0 0 ${(props) => props.width}px;
 `;
 
-function axisComponentBySeriesType(type) {
-  if (type === "paired") {
-    return PairAxis;
+const Axis = ({ serie, height, focused, onClick }) => {
+  if (serie.type === "paired") {
+    return (
+      <LineAxis
+        height={height}
+        color={serie.color}
+        low={serie.bottomLow}
+        high={serie.topHigh}
+        focused={focused}
+        onClick={onClick}
+      />
+    );
   }
-  return Axis;
-}
+  return (
+    <LineAxis
+      height={height}
+      color={serie.color}
+      low={serie.low}
+      high={serie.high}
+      focused={focused}
+      onClick={onClick}
+    />
+  );
+};
 
 const AxesContainer = ({ series, height }) => {
   const { bufferWidth } = useContext(BufferContext);
+  const { focusedSeriesId, setFocusId } = useContext(SeriesFocusContext);
   return (
     <Container width={bufferWidth}>
-      {series.map((serie, index) => {
-        const AxisType = axisComponentBySeriesType(serie.type);
-        return <AxisType key={index} height={height} {...serie} />;
-      })}
+      {series.map((serie, index) => (
+        <Axis
+          key={index}
+          serie={serie}
+          height={height}
+          focused={focusedSeriesId === serie.id}
+          onClick={() => setFocusId(serie.id)}
+        />
+      ))}
     </Container>
   );
 };
