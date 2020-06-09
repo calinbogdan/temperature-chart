@@ -7,7 +7,6 @@ import AxesContainer from "./AxesContainer";
 import LineSeries from "./LineSeries";
 import PairSeries from "./PairSeries";
 import SeriesFocusContext from "./seriesFocusContext";
-import TimelineContext from "../../timelineContext";
 
 const DiagramContainer = styled.div`
   display: flex;
@@ -28,7 +27,11 @@ const Series = ({ serie, height, data, focused }) => {
         topValues={data.topValues}
         bottomValues={data.bottomValues}
         focused={focused}
-        areaVisible={true}
+        normalRangeTop={serie.normalRangeTop}
+        normalRangeBottom={serie.normalRangeBottom}
+        warningRangeTop={serie.warningRangeTop}
+        warningRangeBottom={serie.warningRangeBottom}
+        areaVisible={false}
       />
     );
   }
@@ -40,6 +43,8 @@ const Series = ({ serie, height, data, focused }) => {
       height={height}
       values={data.values}
       focused={focused}
+      normalRange={serie.normalRange}
+      warningRange={serie.warningRange}
     />
   );
 };
@@ -58,21 +63,33 @@ const VitalsDiagram = (props) => {
   const { diagramWidth } = useContext(BufferContext);
   const [focusedSeriesId, setFocusedSeriesId] = useState(null);
 
+  const disabledMap = {};
+  Object.keys(props.data).forEach((key) => {
+    let isDisabled = true;
+    if (props.data[key].type === "paired") {
+      isDisabled = props.data[key].topValues.length < 0;
+    } else {
+      isDisabled = props.data[key].values.length < 0;
+    }
+    disabledMap[key] = isDisabled;
+  });
+
+  const setFocusId = (id) => {
+    if (id === focusedSeriesId) {
+      setFocusedSeriesId(null);
+    } else {
+      setFocusedSeriesId(id);
+    }
+  };
+
   return (
     <DiagramContainer>
-      <SeriesFocusContext.Provider
-        value={{
-          focusedSeriesId,
-          setFocusId: (id) => {
-            if (id === focusedSeriesId) {
-              setFocusedSeriesId(null);
-            } else {
-              setFocusedSeriesId(id);
-            }
-          },
-        }}
-      >
-        <AxesContainer height={props.height} series={props.series} />
+      <SeriesFocusContext.Provider value={{ focusedSeriesId, setFocusId }}>
+        <AxesContainer
+          height={props.height}
+          series={props.series}
+          disabledMap={disabledMap}
+        />
         <svg height={props.height} width={diagramWidth}>
           {focusedLast(props.series, focusedSeriesId).map((serie, index) => (
             <Series

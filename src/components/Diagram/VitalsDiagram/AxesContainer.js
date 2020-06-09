@@ -26,11 +26,11 @@ const AxisWrapper = styled.g`
 
 const InteractiveRectangle = styled.rect`
   &:hover {
-    cursor: pointer;
+    cursor: ${props => props.disabled ? 'default' : 'pointer'};
   }
 `;
 
-const LineAxis = ({ low, high, height, color, onClick, focused }) => {
+const LineAxis = ({ low, high, height, color, onClick, focused, disabled }) => {
   const axisRef = useRef();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const LineAxis = ({ low, high, height, color, onClick, focused }) => {
       />
       <AxisWrapper>
         <g
-          color={color}
+          color={disabled ? "#aaa" : color}
           transform={`translate(${AXIS_WIDTH - 1} 0)`}
           ref={axisRef}
         />
@@ -62,55 +62,9 @@ const LineAxis = ({ low, high, height, color, onClick, focused }) => {
         height="100%"
         width="100%"
         fill="transparent"
-        onClick={onClick}
+        disabled={disabled}
+        onClick={disabled ? null : onClick}
       />
-    </svg>
-  );
-};
-
-const PairAxis = (props) => {
-  const topAxisRef = useRef();
-  const bottomAxisRef = useRef();
-
-  const halfHeight = props.height / 2;
-
-  useEffect(() => {
-    select(topAxisRef.current).call(
-      axisLeft(scaleLinear([props.topLow, props.topHigh], [halfHeight - 2, 0]))
-        .tickSizeOuter(6)
-        .tickSizeInner(4)
-        .tickPadding(4)
-        .ticks(4)
-    );
-    select(bottomAxisRef.current).call(
-      axisLeft(
-        scaleLinear([props.bottomLow, props.bottomHigh], [halfHeight - 2, 0])
-      )
-        .tickSizeOuter(6)
-        .tickSizeInner(4)
-        .tickPadding(4)
-        .ticks(4)
-    );
-  }, []);
-
-  return (
-    <svg height={props.height - 1} width={AXIS_WIDTH}>
-      <g color={props.color} transform="translate(39 0)">
-        <AxisWrapper>
-          <g ref={topAxisRef} />
-        </AxisWrapper>
-        <line
-          stroke={props.color}
-          strokeWidth={0.5}
-          x1={-AXIS_WIDTH}
-          x2={0}
-          y1={halfHeight}
-          y2={halfHeight}
-        />
-        <AxisWrapper>
-          <g transform={`translate(0 ${halfHeight})`} ref={bottomAxisRef} />
-        </AxisWrapper>
-      </g>
     </svg>
   );
 };
@@ -124,7 +78,7 @@ const Container = styled.div`
   flex: 0 0 ${(props) => props.width}px;
 `;
 
-const Axis = ({ serie, height, focused, onClick }) => {
+const Axis = ({ serie, height, focused, disabled, onClick }) => {
   if (serie.type === "paired") {
     return (
       <LineAxis
@@ -133,6 +87,7 @@ const Axis = ({ serie, height, focused, onClick }) => {
         low={serie.bottomLow}
         high={serie.topHigh}
         focused={focused}
+        disabled={disabled}
         onClick={onClick}
       />
     );
@@ -144,12 +99,13 @@ const Axis = ({ serie, height, focused, onClick }) => {
       low={serie.low}
       high={serie.high}
       focused={focused}
+      disabled={disabled}
       onClick={onClick}
     />
   );
 };
 
-const AxesContainer = ({ series, height }) => {
+const AxesContainer = ({ series, height, disabledMap }) => {
   const { bufferWidth } = useContext(BufferContext);
   const { focusedSeriesId, setFocusId } = useContext(SeriesFocusContext);
   return (
@@ -160,6 +116,7 @@ const AxesContainer = ({ series, height }) => {
           serie={serie}
           height={height}
           focused={focusedSeriesId === serie.id}
+          disabled={disabledMap[serie.id]}
           onClick={() => setFocusId(serie.id)}
         />
       ))}
