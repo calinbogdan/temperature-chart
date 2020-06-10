@@ -5,6 +5,9 @@ import { line, area } from "d3-shape";
 import { scaleLinear } from "d3-scale";
 
 import TimelineContext from "../../timelineContext";
+import valueWithin from "./valueWithinFilter";
+import { DangerRange, WarningRange, NormalRange } from "./ranges";
+import ValueDot from "./ValueDot";
 
 const SeriesLine = styled.path`
   fill: none;
@@ -19,21 +22,6 @@ function getGrouped(top, bottom) {
     bottom: bottom[index],
   }));
 }
-
-const Range = ({ lowY, highY, fill }) => {
-  const y = highY;
-  const height = lowY - highY;
-  return <rect width="100%" fill={fill} y={y} height={height} />;
-};
-
-const DangerRange = () => <rect fill="#ff0000" height="100%" width="100%" />;
-
-const WarningRange = ({ highY, lowY }) => (
-  <Range fill="#fff200" highY={highY} lowY={lowY} />
-);
-const NormalRange = ({ highY, lowY }) => (
-  <Range fill="#0be000" highY={highY} lowY={lowY} />
-);
 
 const PairSeries = ({
   color,
@@ -51,7 +39,7 @@ const PairSeries = ({
   warningRangeTop,
   warningRangeBottom,
 }) => {
-  const { timeScale } = useContext(TimelineContext);
+  const { timeScale, domain } = useContext(TimelineContext);
 
   const yTopScale = scaleLinear([topLow, topHigh], [height, height / 2]);
   const yBottomScale = scaleLinear([bottomLow, bottomHigh], [height / 2, 0]);
@@ -108,6 +96,30 @@ const PairSeries = ({
         d={bottomLine(bottomValues)}
         focused={focused}
       />
+      {focused && (
+        <g>
+          {topValues
+            .filter(valueWithin(domain))
+            .map(({ time, value }, index) => (
+              <ValueDot
+                key={index}
+                color={color}
+                cx={timeScale(new Date(time))}
+                cy={yTopScale(value)}
+              />
+            ))}
+          {bottomValues
+            .filter(valueWithin(domain))
+            .map(({ time, value }, index) => (
+              <ValueDot
+                key={index}
+                color={color}
+                cx={timeScale(new Date(time))}
+                cy={yBottomScale(value)}
+              />
+            ))}
+        </g>
+      )}
     </g>
   );
 };

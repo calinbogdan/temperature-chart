@@ -111,19 +111,20 @@ IntermittentInfusion.propTypes = {
 };
 
 function componentForOrderType(order) {
+  const interval = [new Date(order.interval[0]), new Date(order.interval[1])]
   switch (order.type) {
     case "continous":
-      return <ContinousInfusion interval={order.interval} />;
+      return <ContinousInfusion interval={interval} />;
     case "intermittent":
       return (
         <IntermittentInfusion
-          interval={order.interval}
+          interval={interval}
           minutesSpan={order.minutesSpan}
         />
       );
     case "peroral":
       return (
-        <Peroral interval={order.interval} minutesSpan={order.minutesSpan} />
+        <Peroral interval={interval} minutesSpan={order.minutesSpan} />
       );
   }
 }
@@ -149,7 +150,7 @@ const MedicationOrderHeader = (props) => (
   </svg>
 );
 
-const MedicationDiagram = ({ orders }) => {
+const MedicationDiagram = ({ data }) => {
   const { bufferWidth, diagramWidth, width } = useContext(BufferContext);
 
   return (
@@ -158,7 +159,7 @@ const MedicationDiagram = ({ orders }) => {
         <div style={{
           position: "absolute"
         }}>
-          {orders.map((order, index) => {
+          {data.map((order, index) => {
             return (
               <MedicationOrderWrapper
                 height={ORDER_HEIGHT}
@@ -180,13 +181,17 @@ const MedicationDiagram = ({ orders }) => {
         </div>
         <ControllerLayer offsetX={bufferWidth}>
           <TimelineController
-            height={ORDER_HEIGHT * orders.length}
+            height={ORDER_HEIGHT * data.length}
             width={diagramWidth}
           />
         </ControllerLayer>
       </DiagramContent>
     </DiagramWrapper>
   );
+};
+
+MedicationDiagram.defaultProps = {
+  data: []
 };
 
 export default MedicationDiagram;

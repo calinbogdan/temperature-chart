@@ -1,7 +1,5 @@
 import React, { useState, Children, useEffect } from "react";
 import PropTypes from "prop-types";
-
-// import TimelineContext from "./timelineContext";
 import BufferContext from "./bufferContext";
 
 import Timeline from "./Timeline";

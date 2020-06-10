@@ -5,6 +5,9 @@ import { line } from "d3-shape";
 import { scaleLinear } from "d3-scale";
 
 import TimelineContext from "../../timelineContext";
+import valueWithin from "./valueWithinFilter";
+import { DangerRange, WarningRange, NormalRange } from "./ranges";
+import ValueDot from "./ValueDot"
 
 const SeriesLine = styled.path`
   fill: none;
@@ -12,21 +15,6 @@ const SeriesLine = styled.path`
   stroke: ${(props) => props.color};
   stroke-width: ${(props) => (props.focused ? 2 : 1)};
 `;
-
-const Range = ({ lowY, highY, fill }) => {
-  const y = highY;
-  const height = lowY - highY;
-  return <rect width="100%" fill={fill} y={y} height={height} />;
-};
-
-const DangerRange = () => <rect fill="#ff0000" height="100%" width="100%"/>
-
-const WarningRange = ({ highY, lowY }) => (
-  <Range fill="#fff200" highY={highY} lowY={lowY} />
-);
-const NormalRange = ({ highY, lowY }) => (
-  <Range fill="#0be000" highY={highY} lowY={lowY} />
-);
 
 const LineSeries = ({
   color,
@@ -38,7 +26,7 @@ const LineSeries = ({
   normalRange,
   warningRange,
 }) => {
-  const { timeScale } = useContext(TimelineContext);
+  const { domain, timeScale } = useContext(TimelineContext);
 
   const yScale = useCallback(scaleLinear([low, high], [height, 0]), [
     low,
@@ -66,19 +54,21 @@ const LineSeries = ({
         </g>
       )}
       <SeriesLine color={color} focused={focused} d={lineWith(values)} />
-      {focused &&
-        values.map(({ time, value }, index) => (
-          <circle
-            key={index}
-            r={3}
-            stroke={color}
-            fill="white"
-            cx={timeScale(new Date(time))}
-            cy={yScale(value)}
-          />
-        ))}
+      {focused && (
+        <g>
+          {values.filter(valueWithin(domain)).map(({ time, value }, index) => (
+            <ValueDot
+              key={index}
+              color={color}
+              cx={timeScale(new Date(time))}
+              cy={yScale(value)}
+            />
+          ))}
+        </g>
+      )}
     </g>
   );
 };
+
 
 export default LineSeries;
