@@ -9,6 +9,28 @@ const FULL_DOMAIN_CHANGE = "FULL_DOMAIN_CHANGE";
 const DRAG = "DRAG";
 const SCALE_RANGE_CHANGED = "SCALE_RANGE_CHANGED";
 
+function drag(currentState, action) {
+  const { movementX } = action;
+  const { scale, domain, fullDomain } = currentState;
+  const x1 = scale(domain[0]);
+  const x2 = scale(domain[1]);
+
+  const newStart = scale.invert(x1 - movementX);
+  const newEnd = scale.invert(x2 - movementX);
+
+  if (
+    newStart.getTime() >= fullDomain[0].getTime() &&
+    newEnd.getTime() <= fullDomain[1].getTime()
+  ) {
+    return {
+      ...currentState,
+      scale: scaleTime([newStart, newEnd], scale.range()),
+      domain: [newStart, newEnd],
+    };
+  }
+  return currentState;
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case FULL_DOMAIN_CHANGE:
@@ -25,26 +47,8 @@ const reducer = (state, action) => {
         scale: scaleTime(state.scale.domain(), [0, action.width]),
       };
 
-    case DRAG: {
-      const { movementX } = action;
-      const x1 = state.scale(state.domain[0]);
-      const x2 = state.scale(state.domain[1]);
-
-      const newStart = state.scale.invert(x1 - movementX);
-      const newEnd = state.scale.invert(x2 - movementX);
-
-      if (
-        newStart.getTime() >= state.fullDomain[0].getTime() &&
-        newEnd.getTime() <= state.fullDomain[1].getTime()
-      ) {
-        return {
-          ...state,
-          scale: scaleTime([newStart, newEnd], state.scale.range()),
-          domain: [newStart, newEnd],
-        };
-      }
-      return state;
-    }
+    case DRAG: 
+      return drag(state, action);
     case ZOOM:
       const { x, zoomingIn } = action;
       const currentTime = state.scale.invert(x);
@@ -104,6 +108,13 @@ const TimelineProvider = ({ children, startDate, endDate }) => {
       width: diagramWidth,
     });
   }, [diagramWidth]);
+
+  useEffect(() => {
+    dispatch({
+      type: FULL_DOMAIN_CHANGE, 
+      fullDomain: [startDate, endDate]
+    })
+  }, [startDate, endDate])
 
   return (
     <TimelineContext.Provider

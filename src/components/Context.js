@@ -16,11 +16,11 @@ const ContextWrapper = styled.div`
   max-width: ${props => props.width}px;
 `;
 
-const Context = (props) => {
+function useBufferWidthAdjuster(contextChildren) {
   const [bufferWidth, setBufferWidth] = useState(0);
 
   useEffect(() => {
-    const children = Children.toArray(props.children);
+    const children = Children.toArray(contextChildren);
     
     const medicationBufferWidth = anyMedicationDiagram(children) ? MEDICATION_BUFFER_WIDTH : 0;
     const vitalsAxesLengths = children.map(diagram => {
@@ -31,7 +31,16 @@ const Context = (props) => {
     });
     const vitalsBufferWidth = Math.max(...vitalsAxesLengths);
     setBufferWidth(Math.max(vitalsBufferWidth, medicationBufferWidth));
-  }, [props.children]);
+  }, [contextChildren]);
+
+  return bufferWidth;
+}
+
+const Context = (props) => {
+  const bufferWidth = useBufferWidthAdjuster(props.children);
+
+  const startDate = props.startDate instanceof Date ? props.startDate : new Date(props.startDate);
+  const endDate = props.endDate instanceof Date ? props.endDate : new Date(props.endDate);
 
   return (
     <ContextWrapper width={props.width}>
@@ -42,7 +51,7 @@ const Context = (props) => {
           diagramWidth: props.width - bufferWidth,
         }}
       >
-        <TimelineProvider startDate={props.startDate} endDate={props.endDate}>
+        <TimelineProvider startDate={startDate} endDate={endDate}>
           <Timeline width={props.width} />
           {props.children}
         </TimelineProvider>

@@ -32,7 +32,7 @@ const WarningRange = ({ highY, lowY }) => (
   <Range fill="#fff200" highY={highY} lowY={lowY} />
 );
 const NormalRange = ({ highY, lowY }) => (
-  <Range fill="#0be000  " highY={highY} lowY={lowY} />
+  <Range fill="#0be000" highY={highY} lowY={lowY} />
 );
 
 const PairSeries = ({
@@ -49,7 +49,7 @@ const PairSeries = ({
   normalRangeTop,
   normalRangeBottom,
   warningRangeTop,
-  warningRangeBottom
+  warningRangeBottom,
 }) => {
   const { timeScale } = useContext(TimelineContext);
 
@@ -80,13 +80,27 @@ const PairSeries = ({
 
   return (
     <g>
-      {focused && <g opacity={0.2}>
-        <DangerRange/>
-        <WarningRange highY={yTopScale(warningRangeTop.top)} lowY={yTopScale(warningRangeTop.low)}/>
-        <WarningRange highY={yBottomScale(warningRangeBottom.top)} lowY={yBottomScale(warningRangeBottom.low)}/>
-        <NormalRange highY={yTopScale(normalRangeTop.top)} lowY={yTopScale(normalRangeTop.low)}/>
-        <NormalRange highY={yBottomScale(normalRangeBottom.top)} lowY={yBottomScale(normalRangeBottom.low)}/>
-      </g>}
+      {focused && (
+        <g opacity={0.2}>
+          <DangerRange />
+          <WarningRange
+            highY={yTopScale(warningRangeTop.top)}
+            lowY={yTopScale(warningRangeTop.low)}
+          />
+          <WarningRange
+            highY={yBottomScale(warningRangeBottom.top)}
+            lowY={yBottomScale(warningRangeBottom.low)}
+          />
+          <NormalRange
+            highY={yTopScale(normalRangeTop.top)}
+            lowY={yTopScale(normalRangeTop.low)}
+          />
+          <NormalRange
+            highY={yBottomScale(normalRangeBottom.top)}
+            lowY={yBottomScale(normalRangeBottom.low)}
+          />
+        </g>
+      )}
       <SeriesLine color={color} d={topLine(topValues)} focused={focused} />
       {seriesArea}
       <SeriesLine

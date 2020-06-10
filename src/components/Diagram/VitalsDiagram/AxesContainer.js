@@ -41,7 +41,7 @@ const LineAxis = ({ low, high, height, color, onClick, focused, disabled }) => {
         .tickPadding(4)
         .ticks(5)
     );
-  }, []);
+  }, [low, high, height]);
 
   return (
     <svg height={height - 1} width={AXIS_WIDTH}>
