@@ -29,7 +29,47 @@ function drag(currentState, action) {
     };
   }
   return currentState;
-};
+}
+
+function zoom(currentState, action) {
+  const { x, zoomingIn } = action;
+  const { scale, fullDomain } = currentState;
+  const currentTime = scale.invert(x);
+  const diagramWidth = scale.range()[1];
+
+  const leftPixelsInterval = x;
+  const rightPixelsInterval = diagramWidth - x;
+
+  const leftScale = scaleTime([scale.domain()[0], currentTime], [0, x]);
+  const rightScale = scaleTime(
+    [currentTime, scale.domain()[1]],
+    [x, diagramWidth]
+  );
+
+  let newStart, newEnd;
+  if (zoomingIn) {
+    newStart = leftScale.invert(leftPixelsInterval * 0.1);
+    newEnd = rightScale.invert(diagramWidth - rightPixelsInterval * 0.1);
+  } else {
+    newStart = leftScale.invert(0 - leftPixelsInterval * 0.1);
+    newEnd = rightScale.invert(diagramWidth + rightPixelsInterval * 0.1);
+  }
+
+  // TODO prevent the timeline from zooming out ouside the domain
+
+  const fullInterval =
+    fullDomain[1].getTime() - fullDomain[0].getTime();
+  const interval = newEnd.getTime() - newStart.getTime();
+
+  if (interval <= fullInterval) {
+    return {
+      ...currentState,
+      scale: scaleTime([newStart, newEnd], scale.range()),
+      domain: [newStart, newEnd],
+    };
+  }
+  return currentState;
+}
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -47,49 +87,11 @@ const reducer = (state, action) => {
         scale: scaleTime(state.scale.domain(), [0, action.width]),
       };
 
-    case DRAG: 
+    case DRAG:
       return drag(state, action);
     case ZOOM:
-      const { x, zoomingIn } = action;
-      const currentTime = state.scale.invert(x);
-      const diagramWidth = state.scale.range()[1];
-
-      const leftPixelsInterval = x;
-      const rightPixelsInterval = diagramWidth - x;
-
-      const leftScale = scaleTime(
-        [state.scale.domain()[0], currentTime],
-        [0, x]
-      );
-      const rightScale = scaleTime(
-        [currentTime, state.scale.domain()[1]],
-        [x, diagramWidth]
-      );
-
-      let newStart, newEnd;
-      if (zoomingIn) {
-        newStart = leftScale.invert(leftPixelsInterval * 0.1);
-        newEnd = rightScale.invert(diagramWidth - rightPixelsInterval * 0.1);
-      } else {
-        newStart = leftScale.invert(0 - leftPixelsInterval * 0.1);
-        newEnd = rightScale.invert(diagramWidth + rightPixelsInterval * 0.1);
-      }
-
-      // prevent the user from zooming out more than the full domain
-
-      // TODO prevent the timeline from zooming out ouside the domain
-
-      const fullInterval =
-        state.fullDomain[1].getTime() - state.fullDomain[0].getTime();
-      const interval = newEnd.getTime() - newStart.getTime();
-
-      if (interval <= fullInterval) {
-        return {
-          ...state,
-          scale: scaleTime([newStart, newEnd], state.scale.range()),
-          domain: [newStart, newEnd],
-        };
-      }
+      return zoom(state, action);
+    default:
       return state;
   }
 };
@@ -111,10 +113,10 @@ const TimelineProvider = ({ children, startDate, endDate }) => {
 
   useEffect(() => {
     dispatch({
-      type: FULL_DOMAIN_CHANGE, 
-      fullDomain: [startDate, endDate]
-    })
-  }, [startDate, endDate])
+      type: FULL_DOMAIN_CHANGE,
+      fullDomain: [startDate, endDate],
+    });
+  }, [startDate, endDate]);
 
   return (
     <TimelineContext.Provider
