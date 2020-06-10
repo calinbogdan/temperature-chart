@@ -6,7 +6,6 @@ import { orderHeight } from "./constants";
 import OrderContent from "./OrderContent";
 import OrderHeader from "./OrderHeader";
 
-
 const ControllerLayer = styled.div`
   position: absolute;
   z-index: 2;
@@ -47,7 +46,7 @@ const MedicationDiagram = ({ data }) => {
           {data.map((order, index) => {
             return (
               <OrderWrapper key={index} height={orderHeight} width={width}>
-                <OrderHeader width={bufferWidth} text={order.medication} />
+                <OrderHeader width={bufferWidth} text={order.medication} type={order.type}/>
                 <svg height={orderHeight} width={diagramWidth} x={bufferWidth}>
                   <OrderContent data={order} />
                 </svg>
