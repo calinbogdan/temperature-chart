@@ -3,8 +3,20 @@ import styled from "styled-components";
 import { orderHeight } from "./constants";
 import { ContinousIcon, IntermittentIcon, PeroralIcon } from "./icons";
 
-const OrderTitle = styled.p`
+const OrderDetails = styled.div`
   margin: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  & p {
+    margin: 0px;
+  }
+`;
+
+const Quantity = styled.p`
+  font-size: 0.75em;
+  color: #666;
 `;
 
 const Wrapper = styled.div`
@@ -34,7 +46,10 @@ const OrderHeader = (props) => (
     <rect height="100%" width="100%" fill="#eee" />
     <foreignObject height="100%" width="100%">
       <Wrapper>
-        <OrderTitle>{props.text}</OrderTitle>
+        <OrderDetails>
+          <p>{props.text}</p>
+          <Quantity>{props.quantity}</Quantity>
+        </OrderDetails>
         <IconWrapper>
           <OrderIcon orderType={props.type} />
         </IconWrapper>

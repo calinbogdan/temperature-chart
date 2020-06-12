@@ -8,6 +8,7 @@ import TimelineContext from "../../timelineContext";
 import valueWithin from "./valueWithinFilter";
 import { DangerRange, WarningRange, NormalRange } from "./ranges";
 import ValueDot from "./ValueDot";
+import domainIsLessThanThreeDays from "./domainIsLessThanThreeDays";
 
 const SeriesLine = styled.path`
   fill: none;
@@ -96,7 +97,7 @@ const PairSeries = ({
         d={bottomLine(bottomValues)}
         focused={focused}
       />
-      {focused && (
+      {focused && domainIsLessThanThreeDays(domain) && (
         <g>
           {topValues
             .filter(valueWithin(domain))

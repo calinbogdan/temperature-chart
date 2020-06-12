@@ -7,7 +7,8 @@ import { scaleLinear } from "d3-scale";
 import TimelineContext from "../../timelineContext";
 import valueWithin from "./valueWithinFilter";
 import { DangerRange, WarningRange, NormalRange } from "./ranges";
-import ValueDot from "./ValueDot"
+import ValueDot from "./ValueDot";
+import domainIsLessThanThreeDays from "./domainIsLessThanThreeDays";
 
 const SeriesLine = styled.path`
   fill: none;
@@ -54,7 +55,7 @@ const LineSeries = ({
         </g>
       )}
       <SeriesLine color={color} focused={focused} d={lineWith(values)} />
-      {focused && (
+      {focused && domainIsLessThanThreeDays(domain) && (
         <g>
           {values.filter(valueWithin(domain)).map(({ time, value }, index) => (
             <ValueDot

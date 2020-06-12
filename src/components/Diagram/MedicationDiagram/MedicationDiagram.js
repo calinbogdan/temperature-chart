@@ -46,7 +46,7 @@ const MedicationDiagram = ({ data }) => {
           {data.map((order, index) => {
             return (
               <OrderWrapper key={index} height={orderHeight} width={width}>
-                <OrderHeader width={bufferWidth} text={order.medication} type={order.type}/>
+                <OrderHeader width={bufferWidth} text={order.medication} quantity={order.quantity} type={order.type}/>
                 <svg height={orderHeight} width={diagramWidth} x={bufferWidth}>
                   <OrderContent data={order} />
                 </svg>
