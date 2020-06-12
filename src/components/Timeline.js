@@ -15,7 +15,7 @@ const Ticks = styled.g`
   }
 `;
 
-const Timeline = ({ width }) => {
+const Timeline = ({ width, ticksHeight }) => {
   const { timeScale } = useContext(TimelineContext);
   const { bufferWidth } = useContext(BufferContext);
   const axisRef = useRef();
@@ -24,7 +24,7 @@ const Timeline = ({ width }) => {
   useEffect(() => {
     select(axisRef.current).call(axisTop(timeScale));
     select(ticksRef.current).call(
-      axisBottom(timeScale).tickSize(300).tickFormat("")
+      axisBottom(timeScale).tickSize(ticksHeight).tickFormat("")
     );
   }, [timeScale]);
 
@@ -42,6 +42,10 @@ const Timeline = ({ width }) => {
       />
     </svg>
   );
+};
+
+Timeline.defaultProps = {
+  ticksHeight: 0
 };
 
 export default Timeline;
